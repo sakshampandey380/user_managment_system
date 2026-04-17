@@ -8,6 +8,14 @@ const isNonEmptyString = (value: unknown): value is string => {
   return typeof value === "string" && value.trim().length > 0;
 };
 
+const trimRequiredString = (value: unknown, fieldName: string): string => {
+  if (!isNonEmptyString(value)) {
+    throw new AppError(400, `${fieldName} is required`);
+  }
+
+  return value.trim();
+};
+
 const isValidDate = (value: string): boolean => {
   if (!dateRegex.test(value)) {
     return false;
@@ -32,42 +40,26 @@ export const validateRegisterInput = (body: unknown): RegisterUserInput => {
   }
 
   const input = body as Record<string, unknown>;
+  const fullName = trimRequiredString(input.full_name, "full_name");
+  const dateOfBirth = trimRequiredString(input.date_of_birth, "date_of_birth");
+  const email = trimRequiredString(input.email, "email");
+  const password = trimRequiredString(input.password, "password");
 
-  if (!isNonEmptyString(input.full_name)) {
-    throw new AppError(400, "full_name is required");
-  }
-
-  if (!isNonEmptyString(input.date_of_birth)) {
-    throw new AppError(400, "date_of_birth is required");
-  }
-
-  if (!isValidDate(input.date_of_birth.trim())) {
+  if (!isValidDate(dateOfBirth)) {
     throw new AppError(400, "date_of_birth must be a valid date in YYYY-MM-DD format");
   }
-
-  if (!isNonEmptyString(input.email)) {
-    throw new AppError(400, "email is required");
-  }
-
-  const email = input.email.trim();
 
   if (!emailRegex.test(email)) {
     throw new AppError(400, "email must be a valid email address");
   }
-
-  if (!isNonEmptyString(input.password)) {
-    throw new AppError(400, "password is required");
-  }
-
-  const password = input.password.trim();
 
   if (password.length < 6) {
     throw new AppError(400, "password must be at least 6 characters long");
   }
 
   return {
-    full_name: input.full_name.trim(),
-    date_of_birth: input.date_of_birth.trim(),
+    full_name: fullName,
+    date_of_birth: dateOfBirth,
     email,
     password
   };
@@ -79,24 +71,20 @@ export const validateLoginInput = (body: unknown): LoginInput => {
   }
 
   const input = body as Record<string, unknown>;
-
-  if (!isNonEmptyString(input.email)) {
-    throw new AppError(400, "email is required");
-  }
-
-  const email = input.email.trim();
+  const email = trimRequiredString(input.email, "email");
+  const password = trimRequiredString(input.password, "password");
 
   if (!emailRegex.test(email)) {
     throw new AppError(400, "email must be a valid email address");
   }
 
-  if (!isNonEmptyString(input.password)) {
-    throw new AppError(400, "password is required");
+  if (password.length < 6) {
+    throw new AppError(400, "password must be at least 6 characters long");
   }
 
   return {
     email,
-    password: input.password.trim()
+    password
   };
 };
 

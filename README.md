@@ -160,7 +160,7 @@ Success response `200`:
 Possible errors:
 
 - `404` if user does not exist
-- `403` if account is blocked
+- `403` with `"User account is blocked"` if account is blocked
 - `401` if password is wrong
 
 ### GET /users/:id
@@ -236,7 +236,7 @@ Returns `403` if a non-admin user tries to block another user.
 - `full_name`: required and trimmed
 - `date_of_birth`: required and must be a valid date
 - `email`: required, trimmed, and must match `/^[^\s@]+@[^\s@]+\.[^\s@]+$/`
-- `password`: required, trimmed, and minimum 6 characters
+- `password`: required, trimmed, and minimum 6 characters for register and login
 
 ## Notes
 

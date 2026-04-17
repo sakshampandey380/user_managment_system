@@ -1,22 +1,23 @@
 import express from "express";
 import userRoutes from "./routes/user.routes";
 import { errorHandler, notFoundHandler } from "./middleware/error.middleware";
+import { homeJsonResponse, renderHomePage } from "./views/home.view";
 
 const app = express();
 
 app.use(express.json());
 
-app.get("/", (_req, res) => {
-  res.status(200).json({
-    message: "User Management Backend is running",
-    endpoints: {
-      register: "POST /register",
-      login: "POST /login",
-      getUser: "GET /users/:id",
-      getUsers: "GET /users",
-      blockUser: "PUT /users/:id/block"
-    }
-  });
+app.get("/", (req, res) => {
+  if (req.accepts("html")) {
+    res.status(200).send(renderHomePage());
+    return;
+  }
+
+  res.status(200).json(homeJsonResponse);
+});
+
+app.get("/health", (_req, res) => {
+  res.status(200).json(homeJsonResponse);
 });
 
 app.use(userRoutes);

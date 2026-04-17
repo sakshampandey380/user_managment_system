@@ -1,5 +1,10 @@
 import { NextFunction, Request, RequestHandler, Response } from "express";
 
+interface RequestParsingError extends SyntaxError {
+  status?: number;
+  body?: unknown;
+}
+
 export class AppError extends Error {
   public readonly statusCode: number;
 
@@ -28,6 +33,16 @@ export const errorHandler = (
   res: Response,
   _next: NextFunction
 ): void => {
+  const parsingError = err as RequestParsingError;
+
+  if (parsingError instanceof SyntaxError && parsingError.status === 400 && "body" in parsingError) {
+    res.status(400).json({
+      error: true,
+      message: "Invalid JSON body"
+    });
+    return;
+  }
+
   if (err instanceof AppError) {
     res.status(err.statusCode).json({
       error: true,

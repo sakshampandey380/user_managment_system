@@ -42,7 +42,7 @@ export const loginUser = async (input: LoginInput): Promise<LoginResponse> => {
   }
 
   if (!user.is_active) {
-    throw new AppError(403, "Account is blocked");
+    throw new AppError(403, "User account is blocked");
   }
 
   const isPasswordValid = await comparePassword(input.password, user.password);
