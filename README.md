@@ -1,35 +1,64 @@
-# User Management Backend System
+# 🔐 User Management Backend System
 
-Node.js, Express.js, TypeScript, JWT, bcrypt, and MySQL backend for user registration, login, protected user access, admin user listing, and account blocking.
+A secure and scalable backend application built with **Node.js, Express.js, TypeScript, MySQL, JWT, and bcrypt**.
 
-## Tech Stack
+This project implements a complete user management system featuring authentication, role-based authorization, protected APIs, and account lifecycle control. It follows clean architecture principles and real-world backend development practices.
 
-- Node.js + Express.js
-- TypeScript with strict mode enabled
-- MySQL using `mysql2`
-- JWT using `jsonwebtoken`
-- Password hashing using `bcryptjs`
-- Environment variables using `dotenv`
+---
 
-## Setup
+## 🚀 Features
 
-1. Install dependencies:
+* User Registration & Login (JWT-based authentication)
+* Role-based Authorization (`admin` / `user`)
+* Protected Routes with Middleware
+* Ownership-based Access Control
+* Admin-only User Listing
+* User Account Blocking (Soft Delete)
+* Input Validation & Error Handling
+* Secure Password Hashing (bcrypt)
+* Environment-based Configuration
+
+---
+
+## 🛠️ Tech Stack
+
+* **Backend:** Node.js, Express.js
+* **Language:** TypeScript (strict mode enabled)
+* **Database:** MySQL (`mysql2`)
+* **Authentication:** JSON Web Tokens (`jsonwebtoken`)
+* **Security:** bcrypt (`bcryptjs`)
+* **Environment:** dotenv
+
+---
+
+## ⚙️ Getting Started
+
+### 1. Install Dependencies
 
 ```bash
 npm install
 ```
 
-2. Create a MySQL database:
+---
+
+### 2. Setup Database
+
+Create a MySQL database:
 
 ```sql
 CREATE DATABASE user_management_system;
 ```
 
-3. Configure `.env`:
+---
+
+### 3. Configure Environment Variables
+
+Create a `.env` file:
 
 ```env
 PORT=3000
 JWT_SECRET=your_secret_key
+
 DB_HOST=127.0.0.1
 DB_PORT=3306
 DB_USER=root
@@ -37,24 +66,30 @@ DB_PASSWORD=
 DB_NAME=user_management_system
 ```
 
-For XAMPP/phpMyAdmin, the default MySQL user is usually `root` with an empty password. If your MySQL user has a password, put that value in `DB_PASSWORD`.
+> 💡 If you're using XAMPP/phpMyAdmin, default MySQL credentials are usually `root` with no password.
 
-4. Start the development server:
+---
+
+### 4. Run the Application
 
 ```bash
 npm run dev
 ```
 
-The server creates the `users` table automatically if it does not already exist.
+The application will automatically create the required `users` table if it does not exist.
 
-## Build and Run
+---
+
+## 🏗️ Build & Production
 
 ```bash
 npm run build
 npm start
 ```
 
-## User Table
+---
+
+## 🗄️ Database Schema
 
 ```sql
 CREATE TABLE IF NOT EXISTS users (
@@ -70,26 +105,18 @@ CREATE TABLE IF NOT EXISTS users (
 );
 ```
 
-## Error Format
+---
 
-All errors return JSON in this shape:
+## 🔐 Authentication
 
-```json
-{
-  "error": true,
-  "message": "Description here"
-}
-```
-
-## Authentication
-
-Protected routes require this header:
+Protected routes require a JWT token:
 
 ```http
 Authorization: Bearer <token>
 ```
 
-Login tokens expire in 24 hours and contain:
+* Token expires in **24 hours**
+* Payload structure:
 
 ```json
 {
@@ -98,13 +125,13 @@ Login tokens expire in 24 hours and contain:
 }
 ```
 
-## API Endpoints
+---
 
-### POST /register
+## 📡 API Endpoints
 
-Registers a new user with default role `user` and `is_active = true`.
+### 🔹 POST `/register`
 
-Request:
+Registers a new user.
 
 ```json
 {
@@ -115,7 +142,7 @@ Request:
 }
 ```
 
-Success response `201`:
+**Success (201):**
 
 ```json
 {
@@ -123,18 +150,11 @@ Success response `201`:
 }
 ```
 
-Email already exists response `400`:
+---
 
-```json
-{
-  "error": true,
-  "message": "Email already exists"
-}
-```
+### 🔹 POST `/login`
 
-### POST /login
-
-Request:
+Authenticates user and returns JWT.
 
 ```json
 {
@@ -143,11 +163,11 @@ Request:
 }
 ```
 
-Success response `200`:
+**Success (200):**
 
 ```json
 {
-  "token": "jwt-token-here",
+  "token": "jwt-token",
   "user": {
     "id": 1,
     "full_name": "John Doe",
@@ -157,90 +177,108 @@ Success response `200`:
 }
 ```
 
-Possible errors:
+---
 
-- `404` if user does not exist
-- `403` with `"User account is blocked"` if account is blocked
-- `401` if password is wrong
+### 🔹 GET `/users/:id` (Protected)
 
-### GET /users/:id
+* Admin → access any user
+* User → access only their own data
 
-Protected route.
+**Response excludes password**
 
-Authorization:
+---
 
-- Admin can access any user.
-- User can access only their own data.
+### 🔹 GET `/users` (Admin Only)
 
-Success response `200`:
+Returns all users.
 
-```json
-{
-  "id": 1,
-  "full_name": "John Doe",
-  "date_of_birth": "1998-05-20",
-  "email": "john@example.com",
-  "role": "user",
-  "is_active": true,
-  "created_at": "2026-04-17T10:00:00.000Z",
-  "updated_at": "2026-04-17T10:00:00.000Z"
-}
-```
+* ❌ Returns `403` if not admin
 
-The password field is never returned.
+---
 
-### GET /users
+### 🔹 PUT `/users/:id/block` (Protected)
 
-Protected admin-only route.
+Blocks a user account (`is_active = false`)
 
-Success response `200`:
+* Admin → block any user
+* User → block self only
 
-```json
-[
-  {
-    "id": 1,
-    "full_name": "John Doe",
-    "date_of_birth": "1998-05-20",
-    "email": "john@example.com",
-    "role": "user",
-    "is_active": true,
-    "created_at": "2026-04-17T10:00:00.000Z",
-    "updated_at": "2026-04-17T10:00:00.000Z"
-  }
-]
-```
+---
 
-Returns `403` if the authenticated user is not an admin.
+## ⚠️ Error Handling
 
-### PUT /users/:id/block
-
-Protected route.
-
-Authorization:
-
-- Admin can block any user.
-- User can block only themselves.
-
-Success response `200`:
+All errors follow a consistent format:
 
 ```json
 {
-  "message": "User blocked successfully"
+  "error": true,
+  "message": "Description here"
 }
 ```
 
-Returns `403` if a non-admin user tries to block another user.
+### Status Codes
 
-## Validation Rules
+* `400` → Validation errors
+* `401` → Unauthorized (JWT issues)
+* `403` → Forbidden (permission / blocked user)
+* `404` → Resource not found
+* `500` → Server error
 
-- `full_name`: required and trimmed
-- `date_of_birth`: required and must be a valid date
-- `email`: required, trimmed, and must match `/^[^\s@]+@[^\s@]+\.[^\s@]+$/`
-- `password`: required, trimmed, and minimum 6 characters for register and login
+---
 
-## Notes
+## ✅ Validation Rules
 
-- Passwords are hashed with bcrypt using `saltRounds = 10`.
-- Plain text passwords are never stored or returned.
-- JWT secrets and database settings are loaded from environment variables.
-- Business logic lives in services, controllers only handle request and response flow.
+* `full_name` → required, trimmed
+* `date_of_birth` → required, valid date
+* `email` → required, trimmed, valid format
+* `password` → required, minimum 6 characters
+
+---
+
+## 🔒 Security Practices
+
+* Passwords are hashed using bcrypt (`saltRounds = 10`)
+* Plain text passwords are never stored or returned
+* JWT is used for secure authentication
+* Blocked users cannot log in
+* Sensitive data is never exposed in API responses
+
+---
+
+## 🧠 Architecture & Design
+
+* Clean separation of concerns:
+
+  * Controllers → handle requests/responses
+  * Services → business logic
+  * Middleware → authentication & error handling
+* TypeScript ensures type safety and scalability
+* Modular structure for maintainability
+
+---
+
+## 📌 Notes
+
+* Database table is auto-created on server start
+* Environment variables are required for configuration
+* Designed to follow real-world backend standards
+
+---
+
+## 👨‍💻 Author
+
+**Saksham**
+
+This project was developed as part of a backend assignment to demonstrate practical understanding of authentication, authorization, and secure API design.
+
+---
+
+## 📬 Final Thoughts
+
+This project showcases:
+
+* Secure backend development
+* Role-based access control
+* Clean and maintainable architecture
+
+Feedback and suggestions are always welcome 🚀
